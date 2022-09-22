@@ -35,14 +35,13 @@ export default function Login() {
             alert(response.response.data.message);
             return;
         } else {
-            console.log(response.data);
             alert("Log in successful!");
             localStorage.setItem("docSeekUser", JSON.stringify(response.data));
             const { experience, hospital, location, qualification, specialty } = response.data.data;
             if (!experience || !hospital || !location || !qualification || !specialty) {
                 navigate("/profile-doctor");
             } else {
-                navigate("/home");
+                navigate("/");
             }
         }
     };
@@ -54,14 +53,13 @@ export default function Login() {
             alert(response.response.data.message);
             return;
         } else {
-            console.log(response.data);
             alert("Log in successful!");
             localStorage.setItem("docSeekUser", JSON.stringify(response.data));
-            const { location, past_diseases } = response.data.data;
-            if (!location || !past_diseases) {
+            const { location, past_diseases, blood_group, weight, sex, age } = response.data.data;
+            if (!location || !past_diseases || !blood_group || !weight || !sex || !age) {
                 navigate("/profile-patient");
             } else {
-                navigate("/home");
+                navigate("/");
             }
         }
     };
@@ -96,7 +94,7 @@ export default function Login() {
     useEffect(() => {
         const data = JSON.parse(localStorage.getItem("docSeekUser"));
         if (data) {
-            
+            navigate("/");
         }
         // eslint-disable-next-line
     }, [])
@@ -143,7 +141,7 @@ export default function Login() {
                     >
                         <Avatar
                             src="/images/med_logo.png"
-                            sx={{ width: 150, height: 150 }}
+                            sx={{ width: 150, height: 150, border: "0.25em solid rgb(34 86 138)" }}
                         />
                         <Typography variant="h3" sx={{ fontWeight: "500", mb: "1em", color: "rgb(34 86 138)" }}>
                             DocSeek

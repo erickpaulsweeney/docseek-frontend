@@ -163,6 +163,9 @@ export default function ProfileDoctor() {
         if (!data) {
             navigate("/login");
         } else {
+            if (data.data.role !== "doctor") {
+                navigate("/profile-patient");
+            }
             setUser(data.data);
             fetchSpecialties();
         }

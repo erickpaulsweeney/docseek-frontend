@@ -106,6 +106,7 @@ export default function Signup() {
     useEffect(() => {
         const data = JSON.parse(localStorage.getItem("docSeekUser"));
         if (data) {
+            navigate("/");
         }
         // eslint-disable-next-line
     }, []);
@@ -152,7 +153,7 @@ export default function Signup() {
                     >
                         <Avatar
                             src="/images/med_logo.png"
-                            sx={{ width: 150, height: 150 }}
+                            sx={{ width: 150, height: 150, border: "0.25em solid rgb(34 86 138)" }}
                         />
                         <Typography
                             variant="h3"
