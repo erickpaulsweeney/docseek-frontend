@@ -19,6 +19,8 @@ import {
     CardContent,
     CardActions,
     Chip,
+    Tabs, 
+    Tab, 
 } from "@mui/material";
 import CancelIcon from "@mui/icons-material/Cancel";
 import axiosClient from "../api-config";
@@ -120,6 +122,13 @@ export default function HomePatient() {
                     }}
                 >
                     <Grid container spacing={1}>
+                        <Grid item xs={12} sx={{ borderBottom: 1, borderColor: "divider", mb: "2em" }}>
+                            <Tabs value={"Home"} centered>
+                                <Tab label={"Home"} value={"Home"} />
+                                <Tab label={"Profile"} value={"Profile"} href="/patient/profile" />
+                                <Tab label={"Doctors"} value={"Doctors"} href="/patient/list"/>
+                            </Tabs>
+                        </Grid>
                         <Grid item container spacing={1} xs={12}>
                             <Grid
                                 item
@@ -180,140 +189,9 @@ export default function HomePatient() {
                             sx={{
                                 display: "flex",
                                 justifyContent: "center",
-                                my: "2em",
                             }}
                         >
-                            <Button
-                                size="large"
-                                variant="contained"
-                                sx={{ borderRadius: "2em" }}
-                                onClick={() => navigate("/profile-patient")}
-                            >
-                                Edit your profile
-                            </Button>
-                        </Grid>
-                        <Grid container spacing={1} sx={{ my: "3em" }}>
-                            <Grid item xs={12}>
-                                <Typography
-                                    variant="h4"
-                                    color="rgb(34 86 138)"
-                                    textTransform="uppercase"
-                                    fontWeight="500"
-                                    align="center"
-                                    mb="1em"
-                                >
-                                    Our doctors
-                                </Typography>
-                                <Grid container spacing={3}>
-                                    {doctors.length > 0 &&
-                                        doctors.map((doctor) => (
-                                            <Grid
-                                                key={doctor.name + doctor.id}
-                                                item
-                                                xs
-                                            >
-                                                <Card
-                                                    key={
-                                                        doctor.name + doctor.id
-                                                    }
-                                                >
-                                                    <CardContent
-                                                        sx={{
-                                                            display: "flex",
-                                                            flexDirection:
-                                                                "column",
-                                                        }}
-                                                    >
-                                                        <Typography
-                                                            variant="h5"
-                                                            fontWeight="500"
-                                                        >
-                                                            Dr. {doctor.name}
-                                                        </Typography>
-                                                        <Typography variant="caption">
-                                                            {doctor.hospital}
-                                                        </Typography>
-                                                        <Typography variant="caption">
-                                                            {doctor.location}
-                                                        </Typography>
-                                                        <Grid
-                                                            container
-                                                            spacing={1}
-                                                            sx={{
-                                                                mt: "1em",
-                                                                display: "flex",
-                                                                justifyContent:
-                                                                    "center",
-                                                                flexWrap:
-                                                                    "wrap",
-                                                                gap: "1em",
-                                                            }}
-                                                        >
-                                                            {doctor.specialty.map(
-                                                                (item) => (
-                                                                    <Chip
-                                                                        key={
-                                                                            doctor.id +
-                                                                            specialties[
-                                                                                item -
-                                                                                    1
-                                                                            ]
-                                                                                .name
-                                                                        }
-                                                                        label={
-                                                                            specialties[
-                                                                                item -
-                                                                                    1
-                                                                            ]
-                                                                                .name
-                                                                        }
-                                                                        size="small"
-                                                                        variant="contained"
-                                                                        color="info"
-                                                                        sx={{
-                                                                            textTransform:
-                                                                                "uppercase",
-                                                                        }}
-                                                                    />
-                                                                )
-                                                            )}
-                                                        </Grid>
-                                                    </CardContent>
-                                                    <CardActions
-                                                        sx={{
-                                                            display: "flex",
-                                                            justifyContent:
-                                                                "flex-end",
-                                                        }}
-                                                    >
-                                                        <Button
-                                                            onClick={() =>
-                                                                navigate(
-                                                                    `/doctor/${doctor.id}`
-                                                                )
-                                                            }
-                                                        >
-                                                            View details
-                                                        </Button>
-                                                        <Button variant="contained">
-                                                            Book a consult
-                                                        </Button>
-                                                    </CardActions>
-                                                </Card>
-                                            </Grid>
-                                        ))}
-                                </Grid>
-                            </Grid>
-                        </Grid>
-                        <Grid
-                            item
-                            xs={12}
-                            sx={{
-                                display: "flex",
-                                justifyContent: "center",
-                            }}
-                        >
-                            <Button size="large" onClick={() => logOut()}>
+                            <Button variant="outlined" size="large" onClick={() => logOut()}>
                                 Logout
                             </Button>
                         </Grid>

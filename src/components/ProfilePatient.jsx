@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
     Grid,
     Card,
@@ -16,121 +16,37 @@ import {
     FormControlLabel,
     FormHelperText,
     Checkbox,
-    Radio,
-    RadioGroup,
+    Avatar,
+    Tab,
+    Tabs,
 } from "@mui/material";
 import CancelIcon from "@mui/icons-material/Cancel";
 import axiosClient from "../api-config";
 
 export default function ProfilePatient() {
     const [user, setUser] = useState(null);
-    const [specialties, setSpecialties] = useState([]);
-    const [checked, setChecked] = useState([]);
-    const [issues, setIssues] = useState([{ issue: "", duration: "" }]);
-    const [sex, setSex] = useState("female");
-    const [bloodGroup, setBloodGroup] = useState("A");
-    const [errorMsg, setErrorMsg] = useState("");
+    const [doctors, setDoctors] = useState(null);
+    const [appointments, setAppointments] = useState(null);
     const navigate = useNavigate();
 
-    const handleCheckChange = (id) => {
-        setChecked({ ...checked, [id]: !checked[id] });
-    };
-
-    const handleSexChange = (event) => {
-        setSex(event.target.value);
-    };
-
-    const handleBloodGroupChange = (event) => {
-        setBloodGroup(event.target.value);
-    };
-
-    const handleIssueChange = (event, index) => {
-        const { name, value } = event.target;
-        const newList = [...issues];
-        newList[index][name] = value;
-        setIssues(newList);
-    };
-
-    const handleRemoveIssue = (index) => {
-        const newList = [...issues];
-        newList.splice(index, 1);
-        setIssues(newList);
-    };
-
-    const handleAddIssue = () => {
-        setIssues((prev) => [...prev, { issue: "", duration: "" }]);
-    };
-
-    const fetchSpecialties = async () => {
-        const response = await axiosClient.get("doctor/specialties");
+    const fetchDoctors = async () => {
+        const response = await axiosClient.get("doctor/list");
         if (response.status !== 200) {
             alert(response.response.data.message);
             return;
         } else {
-            setSpecialties(
-                response.data.sort((a, b) => {
-                    if (a.name < b.name) {
-                        return -1;
-                    }
-                    if (a.name > b.name) {
-                        return 1;
-                    }
-                    return 0;
-                })
-            );
-            const newChecked = response.data.reduce((accu, curr) => {
-                accu[curr.id] = false;
-                return accu;
-            }, {});
-            setChecked(newChecked);
+            setDoctors(response.data);
         }
     };
 
-    const saveProfile = async (input) => {
-        const header = { headers: { "Content-Type": "application/json" } };
-        const response = await axiosClient.post(
-            "patient/profile/save",
-            input,
-            header
-        );
+    const fetchAppointments = async () => {
+        const response = await axiosClient.get("patient/consultation");
         if (response.status !== 200) {
             alert(response.response.data.message);
             return;
         } else {
-            alert("Profile saved successfully!");
-            localStorage.setItem("docSeekUser", JSON.stringify(response.data));
-            navigate("/home");
+            setAppointments(response.data);
         }
-    };
-
-    const handleProfileSave = (event) => {
-        event.preventDefault();
-        const data = new FormData(event.currentTarget);
-        const location = data.get("location");
-        const age = data.get("age");
-        const weight = data.get("weight");
-
-        const past_diseases = issues.map(
-            (entry) => `${entry.issue} for ${entry.duration} years`
-        );
-
-        const looking_for = Object.keys(checked).reduce((accu, curr) => {
-            if (checked[curr] === true) {
-                accu.push(curr);
-            }
-            return accu;
-        }, []);
-
-        saveProfile({
-            id: user.id,
-            past_diseases,
-            location,
-            looking_for,
-            blood_group: bloodGroup,
-            weight,
-            sex,
-            age,
-        });
     };
 
     useEffect(() => {
@@ -138,11 +54,9 @@ export default function ProfilePatient() {
         if (!data) {
             navigate("/login");
         } else {
-            if (data.data.role !== "patient") {
-                navigate("/profile-doctor");
-            }
             setUser(data.data);
-            fetchSpecialties();
+            fetchDoctors();
+            fetchAppointments();
         }
         // eslint-disable-next-line
     }, []);
@@ -166,321 +80,183 @@ export default function ProfilePatient() {
                     height: "100vh",
                     width: "100vw",
                     backgroundImage:
-                        "url(https://www.energiepositiefleven.nu/wp-content/uploads/Energiepositief-Zorgen-scaled.jpeg)",
+                        "url(https://media-exp1.licdn.com/dms/image/C4D1BAQHfJGTbk_PrGQ/company-background_10000/0/1603803348388?e=2147483647&v=beta&t=5RJW1d8tVPg2gO_7Wfakp8hVBZh_DPyiHzwB_2OgjDc)",
                     backgroundRepeat: "no-repeat",
                     backgroundSize: "cover",
                     backgroundPosition: "center",
-                    // filter: "saturate(80%) blur(1px)",
+                    filter: "hue-rotate(30deg)",
                     zIndex: "-1",
                 }}
             />
-            {user && (
-                <Container maxWidth="md" sx={{ my: "3em" }}>
-                    <Typography variant="h3" align="center" gutterBottom>
-                        Complete your profile
-                    </Typography>
-                    <Typography align="center" sx={{ mb: "2em" }}>
-                        This will help us serve you better.
-                    </Typography>
-                    <Card sx={{ background: "#ffffffdd", width: "100%" }}>
-                        <CardContent>
-                            <Box component="form" onSubmit={handleProfileSave}>
-                                <Grid container spacing={2} sx={{ mb: "1em" }}>
-                                    <Grid item xs={12}>
-                                        <Typography variant="h6">
-                                            Health Information
-                                        </Typography>
-                                    </Grid>
-                                    <Grid item xs={12} md={6}>
-                                        <FormControl>
-                                            <FormLabel
-                                                id="sex"
-                                                sx={{ fontWeight: "500" }}
-                                            >
-                                                Sex:
-                                            </FormLabel>
-                                            <RadioGroup
-                                                row
-                                                aria-labelledby="sex"
-                                                name="sex"
-                                                value={sex}
-                                                onChange={handleSexChange}
-                                                defaultValue={user.sex}
-                                            >
-                                                <FormControlLabel
-                                                    value="female"
-                                                    control={<Radio />}
-                                                    label="Female"
-                                                />
-                                                <FormControlLabel
-                                                    value="male"
-                                                    control={<Radio />}
-                                                    label="Male"
-                                                />
-                                            </RadioGroup>
-                                        </FormControl>
-                                    </Grid>
-                                    <Grid item xs={12} md={6}>
-                                        <FormControl>
-                                            <FormLabel
-                                                id="bloodGroup"
-                                                sx={{ fontWeight: "500" }}
-                                            >
-                                                Blood Group:
-                                            </FormLabel>
-                                            <RadioGroup
-                                                row
-                                                aria-labelledby="bloodGroup"
-                                                name="bloodGroup"
-                                                value={bloodGroup}
-                                                onChange={
-                                                    handleBloodGroupChange
-                                                }
-                                                defaultValue={user.blood_group}
-                                            >
-                                                <FormControlLabel
-                                                    value="A"
-                                                    control={<Radio />}
-                                                    label="A"
-                                                />
-                                                <FormControlLabel
-                                                    value="B"
-                                                    control={<Radio />}
-                                                    label="B"
-                                                />
-                                                <FormControlLabel
-                                                    value="AB"
-                                                    control={<Radio />}
-                                                    label="AB"
-                                                />
-                                                <FormControlLabel
-                                                    value="O"
-                                                    control={<Radio />}
-                                                    label="O"
-                                                />
-                                            </RadioGroup>
-                                        </FormControl>
-                                    </Grid>
-                                    <Grid item xs={12} md={6}>
-                                        <TextField
-                                            type="number"
-                                            variant="outlined"
-                                            name="age"
-                                            label="Age"
-                                            InputProps={{
-                                                inputProps: { min: 0 },
-                                            }}
-                                            required
-                                            fullWidth
-                                            defaultValue={user.age}
-                                        />
-                                    </Grid>
-                                    <Grid item xs={12} md={6}>
-                                        <TextField
-                                            type="number"
-                                            variant="outlined"
-                                            name="weight"
-                                            label="Weight"
-                                            InputProps={{
-                                                inputProps: { min: 0 },
-                                            }}
-                                            required
-                                            fullWidth
-                                            placeholder="in kilograms"
-                                            defaultValue={user.weight}
-                                        />
-                                    </Grid>
-                                    <Grid item xs={12}>
-                                        <Typography variant="h6">
-                                            Residence
-                                        </Typography>
-                                    </Grid>
-                                    <Grid item xs={12}>
-                                        <TextField
-                                            variant="outlined"
-                                            name="location"
-                                            label="Current Location"
-                                            required
-                                            fullWidth
-                                            defaultValue={user.location}
-                                        />
-                                    </Grid>
+            <Container
+                maxWidth="lg"
+                sx={{
+                    py: "3em",
+                    backgroundColor: "#ffffff81",
+                    minHeight: "100vh",
+                    position: "relative",
+                }}
+            >
+                {user && (
+                    <Grid container spacing={1}>
+                        <Grid
+                            item
+                            xs={12}
+                            sx={{
+                                borderBottom: 1,
+                                borderColor: "divider",
+                                mb: "2em",
+                            }}
+                        >
+                            <Tabs value={"Profile"} centered>
+                                <Tab
+                                    label={"Home"}
+                                    value={"Home"}
+                                    href="/patient"
+                                />
+                                <Tab label={"Profile"} value={"Profile"} />
+                                <Tab
+                                    label={"Doctors"}
+                                    value={"Doctors"}
+                                    href="/patient/list"
+                                />
+                            </Tabs>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Grid
+                                item
+                                xs={12}
+                                sx={{
+                                    display: "flex",
+                                    justifyCenter: "center",
+                                    mb: "2em",
+                                }}
+                            >
+                                <Box
+                                    component="img"
+                                    maxWidth="sm"
+                                    mx="auto"
+                                    src={
+                                        "https://cegeress.fr/wp-content/uploads/2021/02/cegeress-centre-formation-gestion-stress-anxiete-professionnel-sante-toulouse-1.png"
+                                    }
+                                    sx={{ width: "100%" }}
+                                />
+                            </Grid>
+
+                            <Typography
+                                variant="h4"
+                                align="center"
+                                fontWeight="600"
+                            >
+                                {user.name}
+                            </Typography>
+
+                            <Grid container spacing={2} my="2em">
+                                <Grid item xs mx="2em">
+                                    <Typography variant="h6" align="center">
+                                        Sex
+                                    </Typography>
+                                    <Typography variant="body2" align="center">
+                                        {user.sex[0].toUpperCase() + user.sex.slice(1)}
+                                    </Typography>
                                 </Grid>
-                                <Grid container spacing={2} sx={{ mb: "1em" }}>
-                                    <Grid item xs={12}>
-                                        <Typography variant="h6">
-                                            Past Health Issues
-                                        </Typography>
-                                        <Typography
-                                            variant="caption"
-                                            gutterBottom
-                                        >
-                                            Please provide at least one.
-                                        </Typography>
-                                        {issues.map((entry, index) => (
-                                            <Grid
-                                                container
-                                                key={index}
-                                                spacing={1}
-                                                sx={{ my: "1em" }}
-                                            >
-                                                <Grid item xs={11} md={7}>
-                                                    <TextField
-                                                        variant="outlined"
-                                                        name="issue"
-                                                        required={index === 0}
-                                                        fullWidth
-                                                        label={
-                                                            "Issue " +
-                                                            (index + 1)
-                                                        }
-                                                        value={
-                                                            issues[index].issue
-                                                        }
-                                                        onChange={(event) =>
-                                                            handleIssueChange(
-                                                                event,
-                                                                index
-                                                            )
-                                                        }
-                                                    />
-                                                </Grid>
-                                                <Grid item xs={11} md={4}>
-                                                    <TextField
-                                                        type="number"
-                                                        variant="outlined"
-                                                        name="duration"
-                                                        required={index === 0}
-                                                        fullWidth
-                                                        label={
-                                                            "Duration " +
-                                                            (index + 1)
-                                                        }
-                                                        value={
-                                                            issues[index]
-                                                                .duration
-                                                        }
-                                                        onChange={(event) =>
-                                                            handleIssueChange(
-                                                                event,
-                                                                index
-                                                            )
-                                                        }
-                                                        placeholder="Number of years"
-                                                    />
-                                                </Grid>
-                                                <Grid
-                                                    item
-                                                    xs={1}
-                                                    sx={{
-                                                        display: "flex",
-                                                        justifyContent:
-                                                            "center",
-                                                        alignItems: "center",
-                                                    }}
+
+                                <Grid item xs mx="2em">
+                                    <Typography variant="h6" align="center">
+                                        Age
+                                    </Typography>
+                                    <Typography variant="body2" align="center">
+                                        {user.age} years
+                                    </Typography>
+                                </Grid>
+
+                                <Grid item xs mx="2em">
+                                    <Typography variant="h6" align="center">
+                                        Weight
+                                    </Typography>
+                                    <Typography variant="body2" align="center">
+                                        {user.weight} kilograms
+                                    </Typography>
+                                </Grid>
+
+                                <Grid item xs mx="2em">
+                                    <Typography variant="h6" align="center">
+                                        Blood Group
+                                    </Typography>
+                                    <Typography variant="body2" align="center">
+                                        {user.blood_group}
+                                    </Typography>
+                                </Grid>
+
+                                <Grid item xs mx="2em">
+                                    <Typography variant="h6" align="center">
+                                        Location
+                                    </Typography>
+                                    <Typography variant="body2" align="center">
+                                        {user.location}
+                                    </Typography>
+                                </Grid>
+                            </Grid>
+
+                            {user.past_diseases && (
+                                <>
+                                    <Typography
+                                        variant="h6"
+                                        fontWeight="500"
+                                        textTransform="uppercase"
+                                        align="center"
+                                        sx={{
+                                            width: "100%",
+                                            mt: "3em",
+                                            mb: "1em",
+                                        }}
+                                    >
+                                        Past health issues
+                                    </Typography>
+                                    {user.past_diseases.map((item) => {
+                                        const [issue, duration] =
+                                            item.split(" for ");
+                                        return (
+                                            <>
+                                                <Typography
+                                                    variant="h6"
+                                                    align="center"
                                                 >
-                                                    <IconButton
-                                                        disabled={index === 0}
-                                                        onClick={() =>
-                                                            handleRemoveIssue(
-                                                                index
-                                                            )
-                                                        }
-                                                    >
-                                                        <CancelIcon color="error" />
-                                                    </IconButton>
-                                                </Grid>
-                                            </Grid>
-                                        ))}
-                                    </Grid>
-                                    <Button
-                                        onClick={handleAddIssue}
-                                        sx={{ mt: "1em", ml: "auto" }}
-                                    >
-                                        Add Health Issue
-                                    </Button>
-                                </Grid>
-                                <Grid container spacing={0}>
-                                    <Grid item xs={12}>
-                                        <Typography variant="h6">
-                                            Looking for:
-                                        </Typography>
-                                    </Grid>
-                                    <Grid container spacing={0}>
-                                        <FormControl
-                                            component="fieldset"
-                                            variant="standard"
-                                        >
-                                            <FormLabel component="legend">
-                                                <Typography variant="caption">
-                                                    Please check those that are
-                                                    relevant to your current
-                                                    health issues.
+                                                    {issue}
                                                 </Typography>
-                                            </FormLabel>
-                                            <FormGroup>
-                                                <Grid container spacing={0}>
-                                                    {specialties.length > 0 &&
-                                                        specialties.map(
-                                                            (
-                                                                specialty,
-                                                                index
-                                                            ) => (
-                                                                <Grid
-                                                                    key={index}
-                                                                    item
-                                                                    xs={12}
-                                                                    sm={6}
-                                                                    md={4}
-                                                                >
-                                                                    <FormControlLabel
-                                                                        label={
-                                                                            specialty.name
-                                                                        }
-                                                                        control={
-                                                                            <Checkbox
-                                                                                checked={
-                                                                                    checked[
-                                                                                        specialty
-                                                                                            .id
-                                                                                    ]
-                                                                                }
-                                                                                onChange={() =>
-                                                                                    handleCheckChange(
-                                                                                        specialty.id
-                                                                                    )
-                                                                                }
-                                                                                name={
-                                                                                    specialty.name
-                                                                                }
-                                                                            />
-                                                                        }
-                                                                    />
-                                                                </Grid>
-                                                            )
-                                                        )}
-                                                </Grid>
-                                                <FormHelperText>
-                                                    {errorMsg}
-                                                </FormHelperText>
-                                            </FormGroup>
-                                        </FormControl>
-                                    </Grid>
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <Button
-                                        type="submit"
-                                        variant="contained"
-                                        sx={{ mt: "2em", width: "100%" }}
-                                    >
-                                        Save Profile
-                                    </Button>
-                                </Grid>
-                            </Box>
-                        </CardContent>
-                    </Card>
-                </Container>
-            )}
+                                                <Typography
+                                                    variant="body1"
+                                                    align="center"
+                                                >
+                                                    {duration}
+                                                </Typography>
+                                            </>
+                                        );
+                                    })}
+                                </>
+                            )}
+                        </Grid>
+                        <Grid
+                            item
+                            xs={12}
+                            sx={{
+                                display: "flex",
+                                justifyContent: "center",
+                                my: "2em",
+                            }}
+                        >
+                            <Button
+                                size="large"
+                                variant="contained"
+                                sx={{ borderRadius: "2em" }}
+                                onClick={() => navigate("/profile-patient")}
+                            >
+                                Edit your profile
+                            </Button>
+                        </Grid>
+                    </Grid>
+                )}
+            </Container>
         </Grid>
     );
 }

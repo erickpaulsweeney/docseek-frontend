@@ -20,7 +20,7 @@ import {
 import CancelIcon from "@mui/icons-material/Cancel";
 import axiosClient from "../api-config";
 
-export default function ProfileDoctor() {
+export default function ProfileDoctorEdit() {
     const [user, setUser] = useState(null);
     const [specialties, setSpecialties] = useState([]);
     const [checked, setChecked] = useState([]);

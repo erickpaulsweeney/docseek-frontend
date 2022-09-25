@@ -180,7 +180,7 @@ export default function Login() {
                     </Box>
                     <Grid container sx={{ width: "90%", mb: "3em" }}>
                         <Grid item xs>
-                            <Link href="#" variant="body2">
+                            <Link href={"/forgot-password"} variant="body2">
                                 Forgot password?
                             </Link>
                         </Grid>

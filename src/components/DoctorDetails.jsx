@@ -36,17 +36,7 @@ export default function DoctorDetails() {
             alert(response.response.data.message);
             return;
         } else {
-            setSpecialties(
-                response.data.sort((a, b) => {
-                    if (a.name < b.name) {
-                        return -1;
-                    }
-                    if (a.name > b.name) {
-                        return 1;
-                    }
-                    return 0;
-                })
-            );
+            setSpecialties(response.data);
             const newChecked = response.data.reduce((accu, curr) => {
                 accu[curr.id] = false;
                 return accu;
@@ -116,7 +106,7 @@ export default function DoctorDetails() {
             >
                 <IconButton
                     sx={{ position: "absolute", top: "1em", left: "1em" }}
-                    onClick={() => navigate("/")}
+                    onClick={() => navigate("/patient/list")}
                 >
                     <ArrowBackIcon />
                 </IconButton>
@@ -315,13 +305,27 @@ export default function DoctorDetails() {
                                 </Grid>
                             </Grid>
                         )}
-                        <Grid
-                            item
-                            xs={12}
-                            sx={{ display: "flex", justifyContent: "center" }}
-                        >
-                            <Button variant="contained" size="large">Book a consult now</Button>
-                        </Grid>
+                        {user && doctor && (
+                            <Grid
+                                item
+                                xs={12}
+                                sx={{
+                                    display: "flex",
+                                    justifyContent: "center",
+                                }}
+                            >
+                                <Button
+                                    variant="contained"
+                                    size="large"
+                                    disabled={doctor.timeslots === null}
+                                    onClick={() =>
+                                        navigate(`/consultation/new/${id}`)
+                                    }
+                                >
+                                    Book a consult now
+                                </Button>
+                            </Grid>
+                        )}
                     </Grid>
                 </Grid>
             </Container>
