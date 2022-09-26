@@ -33,7 +33,7 @@ export default function Doctors() {
     const [search, setSearch] = useState("");
     const [selected, setSelected] = useState([]);
     const [showList, setShowList] = useState(false);
-    const [maxCost, setMaxCost] = useState(null);
+    const [maxCost, setMaxCost] = useState("");
     const navigate = useNavigate();
 
     const handleCheckChange = (id) => {
@@ -151,6 +151,7 @@ export default function Doctors() {
                             <Grid
                                 item
                                 xs={12}
+                                md={6}
                                 sx={{
                                     display: "flex",
                                     justifyContent: "center",
@@ -164,6 +165,26 @@ export default function Doctors() {
                                     label="Search by name"
                                     onChange={(event) =>
                                         setSearch(event.target.value)
+                                    }
+                                />
+                            </Grid>
+                            <Grid
+                                item
+                                xs={12}
+                                md={6}
+                                sx={{
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    mb: "2em",
+                                }}
+                            >
+                                <TextField
+                                    type="number"
+                                    name="maxCost"
+                                    value={maxCost}
+                                    label="Search by max consultation cost"
+                                    onChange={(event) =>
+                                        setMaxCost(event.target.value)
                                     }
                                 />
                             </Grid>
@@ -253,10 +274,15 @@ export default function Doctors() {
                                 <Grid container spacing={3}>
                                     {doctors.length > 0 &&
                                         doctors.map((doctor) => {
+                                            if (maxCost) {
+                                                if (doctor.rate > maxCost) {
+                                                    return;
+                                                }
+                                            }
                                             if (search.length > 0) {
                                                 if (
                                                     !doctor.name.includes(
-                                                        search
+                                                        search.toLowerCase()
                                                     )
                                                 ) {
                                                     return;

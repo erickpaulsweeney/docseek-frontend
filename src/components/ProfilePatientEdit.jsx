@@ -102,7 +102,9 @@ export default function ProfilePatientEdit() {
             return;
         } else {
             alert("Profile saved successfully!");
-            localStorage.setItem("docSeekUser", JSON.stringify(response.data));
+            const data = JSON.parse(localStorage.getItem("docSeekUser"));
+            data.data = response.data;
+            localStorage.setItem("docSeekUser", JSON.stringify(data));
             navigate("/patient/profile");
         }
     };

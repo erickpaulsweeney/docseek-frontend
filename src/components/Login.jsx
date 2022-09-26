@@ -41,7 +41,7 @@ export default function Login() {
             if (!experience || !hospital || !location || !qualification || !specialty) {
                 navigate("/profile-doctor");
             } else {
-                navigate("/");
+                navigate("/doctor");
             }
         }
     };
@@ -59,7 +59,7 @@ export default function Login() {
             if (!location || !past_diseases || !blood_group || !weight || !sex || !age) {
                 navigate("/profile-patient");
             } else {
-                navigate("/");
+                navigate("/patient");
             }
         }
     };

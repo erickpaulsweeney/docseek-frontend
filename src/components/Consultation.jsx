@@ -86,7 +86,7 @@ export default function Consultation() {
             patient_id: user.id,
             date: formattedDate,
             time,
-            status: "Pending",
+            status: "Approved",
             cost: doctor.rate,
         };
 
@@ -100,7 +100,7 @@ export default function Consultation() {
             return;
         } else {
             alert("Appointment successfully set!");
-            navigate("/");
+            navigate("/patient");
         }
     };
 

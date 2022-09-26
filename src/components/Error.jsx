@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
     Grid,
@@ -10,7 +10,18 @@ import {
 } from "@mui/material";
 
 export default function Error() {
+    const [user, setUser] = useState(null)
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const data = JSON.parse(localStorage.getItem("docSeekUser"));
+        if (!data) {
+            navigate("/login");
+        } else {
+            setUser(data.data);
+        }
+        // eslint-disable-next-line
+    }, [])
 
     return (
         <Grid
@@ -47,7 +58,7 @@ export default function Error() {
                     minHeight: "100vh",
                 }}
             >
-                <Grid container spacing={1}>
+                {user && <Grid container spacing={1}>
                     <Grid item container spacing={1} xs={12}>
                         <Grid
                             item
@@ -92,11 +103,11 @@ export default function Error() {
                         </Grid>
                         <Grid item xs={12} sx={{ my: "3em", display: "flex", flexDirection: "column", alignItems: "center", gap: "1em" }}>
                             <Typography variant="h4" align="center" gutterBottom>You seem to be lost!</Typography>
-                            <Button variant="contained" onClick={() => navigate("/")}>Go back to home page</Button>
+                            <Button variant="contained" onClick={() => user.role === "patient" ? navigate("/patient") : navigate("/doctor")}>Go back to home page</Button>
                             <Button onClick={() => navigate("/login")}>Log in</Button>
                         </Grid>
                     </Grid>
-                </Grid>
+                </Grid>}
             </Container>
         </Grid>
     );

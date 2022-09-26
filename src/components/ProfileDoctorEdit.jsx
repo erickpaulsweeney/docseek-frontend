@@ -96,8 +96,10 @@ export default function ProfileDoctorEdit() {
             return;
         } else {
             alert("Profile saved successfully!");
-            localStorage.setItem("docSeekUser", JSON.stringify(response.data));
-            navigate("/home");
+            const data = JSON.parse(localStorage.getItem("docSeekUser"));
+            data.data = response.data;
+            localStorage.setItem("docSeekUser", JSON.stringify(data));
+            navigate("/doctor/profile");
         }
     }
 
@@ -151,12 +153,22 @@ export default function ProfileDoctorEdit() {
                 })
             );
             const newChecked = response.data.reduce((accu, curr) => {
-                accu[curr.id] = false;
+                if (user.specialty?.includes(curr.id)) {
+                    accu[curr.id] = true;
+                } else {
+                    accu[curr.id] = false;
+                }
                 return accu;
             }, {});
             setChecked(newChecked);
         }
     };
+
+    useEffect(() => {
+        if (user) {
+            fetchSpecialties();
+        }
+    }, [user])
 
     useEffect(() => {
         const data = JSON.parse(localStorage.getItem("docSeekUser"));
@@ -167,7 +179,20 @@ export default function ProfileDoctorEdit() {
                 navigate("/profile-patient");
             }
             setUser(data.data);
-            fetchSpecialties();
+            const qualification = data.data.qualification?.reduce((accu, curr) => {
+                const [training, institution] = curr.split(" in ");
+                accu.push({ training, institution });
+                return accu;
+            }, []);
+            setQualiInputs(qualification);
+            const experience = data.data.experience?.reduce((accu, curr) => {
+                const [experience, rest1] = curr.split(" in ");
+                const [institution, rest2] = rest1.split(" from ");
+                const [start, end] = rest2.split(" to ");
+                accu.push({ experience, institution, start, end });
+                return accu;
+            }, []);
+            setExpInputs(experience);
         }
         // eslint-disable-next-line
     }, []);
@@ -223,6 +248,7 @@ export default function ProfileDoctorEdit() {
                                             label="Current Hospital"
                                             required
                                             fullWidth
+                                            defaultValue={user.hospital}
                                         />
                                     </Grid>
                                     <Grid item xs={12} md={6}>
@@ -232,6 +258,7 @@ export default function ProfileDoctorEdit() {
                                             label="Current Location"
                                             required
                                             fullWidth
+                                            defaultValue={user.location}
                                         />
                                     </Grid>
                                 </Grid>

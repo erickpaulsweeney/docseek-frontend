@@ -19,41 +19,31 @@ import {
     CardContent,
     CardActions,
     Chip,
-    Tabs, 
-    Tab, 
+    Tabs,
+    Tab,
 } from "@mui/material";
 import CancelIcon from "@mui/icons-material/Cancel";
 import axiosClient from "../api-config";
 
 export default function HomePatient() {
     const [user, setUser] = useState(null);
+    const [consults, setConsults] = useState({ past: [], upcoming: [] });
     const [doctors, setDoctors] = useState([]);
-    const [specialties, setSpecialties] = useState([]);
-    const [checked, setChecked] = useState({});
     const navigate = useNavigate();
 
-    const fetchSpecialties = async () => {
-        const response = await axiosClient.get("doctor/specialties");
+    const fetchConsults = async () => {
+        const response = await axiosClient.get("patient/consultation");
         if (response.status !== 200) {
             alert(response.response.data.message);
             return;
         } else {
-            setSpecialties(
-                response.data.sort((a, b) => {
-                    if (a.name < b.name) {
-                        return -1;
-                    }
-                    if (a.name > b.name) {
-                        return 1;
-                    }
-                    return 0;
-                })
+            const upcoming = response.data.filter(
+                (el) => el.status === "Approved"
             );
-            const newChecked = response.data.reduce((accu, curr) => {
-                accu[curr.id] = false;
-                return accu;
-            }, {});
-            setChecked(newChecked);
+            const past = response.data.filter(
+                (el) => el.status === "Completed"
+            );
+            setConsults({ past, upcoming });
         }
     };
 
@@ -79,7 +69,7 @@ export default function HomePatient() {
             navigate("/login");
         } else {
             setUser(data.data);
-            fetchSpecialties();
+            fetchConsults();
             fetchDoctors();
         }
         // eslint-disable-next-line
@@ -112,7 +102,7 @@ export default function HomePatient() {
                     zIndex: "-1",
                 }}
             />
-            {user && doctors.length > 0 && specialties.length > 0 && (
+            {user && doctors.length > 0 && (
                 <Container
                     maxWidth="lg"
                     sx={{
@@ -122,11 +112,27 @@ export default function HomePatient() {
                     }}
                 >
                     <Grid container spacing={1}>
-                        <Grid item xs={12} sx={{ borderBottom: 1, borderColor: "divider", mb: "2em" }}>
+                        <Grid
+                            item
+                            xs={12}
+                            sx={{
+                                borderBottom: 1,
+                                borderColor: "divider",
+                                mb: "2em",
+                            }}
+                        >
                             <Tabs value={"Home"} centered>
                                 <Tab label={"Home"} value={"Home"} />
-                                <Tab label={"Profile"} value={"Profile"} href="/patient/profile" />
-                                <Tab label={"Doctors"} value={"Doctors"} href="/patient/list"/>
+                                <Tab
+                                    label={"Profile"}
+                                    value={"Profile"}
+                                    href="/patient/profile"
+                                />
+                                <Tab
+                                    label={"Doctors"}
+                                    value={"Doctors"}
+                                    href="/patient/list"
+                                />
                             </Tabs>
                         </Grid>
                         <Grid item container spacing={1} xs={12}>
@@ -175,12 +181,119 @@ export default function HomePatient() {
                                 </Typography>
                                 <Box
                                     component="img"
-                                    maxWidth="md"
+                                    maxWidth="sm"
                                     src={
                                         "https://www.brainvire.com/wp/wp-content/uploads/2020/05/Healthcare-banner.png"
                                     }
-                                    sx={{ width: "100%" }}
+                                    sx={{ width: "100%", mb: "1em" }}
                                 />
+                                <Grid item xs={12}>
+                                    <Typography
+                                        variant="h5"
+                                        align="center"
+                                        fontWeight="600"
+                                        mb="0.5em"
+                                    >
+                                        Upcoming Consults
+                                    </Typography>
+                                </Grid>
+
+                                {consults.upcoming.length === 0 && (
+                                    <Grid item xs={12}>
+                                        <Typography vaariant="overline" mb="2em">
+                                            No upcoming consults
+                                        </Typography>
+                                    </Grid>
+                                )}
+                                {consults.upcoming.length > 0 &&
+                                    consults.upcoming.map((consult) => {
+                                        const doctor = doctors.find(
+                                            (el) => el.id === consult.doctor_id
+                                        );
+                                        return (
+                                            <Grid item xs={12} m="2em">
+                                                <Card sx={{ p: "1em" }}>
+                                                    <CardContent>
+                                                        <Typography variant="overline">
+                                                            Your doctor:
+                                                        </Typography>
+                                                        <Typography variant="h6" gutterBottom>
+                                                            Dr. {doctor.name}
+                                                        </Typography>
+                                                        <Typography variant="overline">
+                                                            Date of consult:
+                                                        </Typography>
+                                                        <Typography variant="h6" gutterBottom>
+                                                            {consult.date.slice(0, 10)}
+                                                        </Typography>
+                                                        <Typography variant="overline">
+                                                            Time of consult:
+                                                        </Typography>
+                                                        <Typography variant="h6" gutterBottom>
+                                                            {consult.time}
+                                                        </Typography>
+                                                    </CardContent>
+                                                </Card>
+                                            </Grid>
+                                        );
+                                    })}
+                                
+                                <Grid item xs={12}>
+                                    <Typography
+                                        variant="h5"
+                                        align="center"
+                                        fontWeight="600"
+                                        mb="0.5em"
+                                    >
+                                        Past Consults
+                                    </Typography>
+                                </Grid>
+
+                                {consults.past.length === 0 && (
+                                    <Grid item xs={12}>
+                                        <Typography vaariant="overline" mb="2em">
+                                            No upcoming consults
+                                        </Typography>
+                                    </Grid>
+                                )}
+                                {consults.past.length > 0 &&
+                                    consults.past.map((consult) => {
+                                        const doctor = doctors.find(
+                                            (el) => el.id === consult.doctor_id
+                                        );
+                                        return (
+                                            <Grid item xs={12} m="2em">
+                                                <Card sx={{ p: "1em" }}>
+                                                    <CardContent>
+                                                        <Typography variant="overline">
+                                                            Your doctor:
+                                                        </Typography>
+                                                        <Typography variant="h6" gutterBottom>
+                                                            Dr. {doctor.name}
+                                                        </Typography>
+                                                        <Typography variant="overline">
+                                                            Date of consult:
+                                                        </Typography>
+                                                        <Typography variant="h6" gutterBottom>
+                                                            {consult.date.slice(0, 10)}
+                                                        </Typography>
+                                                        <Typography variant="overline">
+                                                            Time of consult:
+                                                        </Typography>
+                                                        <Typography variant="h6" gutterBottom>
+                                                            {consult.time}
+                                                        </Typography>
+                                                        <Typography variant="overline">
+                                                            Prescription:
+                                                        </Typography>
+                                                        <Typography variant="h6" gutterBottom>
+                                                            {consult.prescription}
+                                                        </Typography>
+                                                    </CardContent>
+                                                </Card>
+                                            </Grid>
+                                        );
+                                    })}
                             </Grid>
                         </Grid>
                         <Grid
@@ -191,7 +304,11 @@ export default function HomePatient() {
                                 justifyContent: "center",
                             }}
                         >
-                            <Button variant="outlined" size="large" onClick={() => logOut()}>
+                            <Button
+                                variant="outlined"
+                                size="large"
+                                onClick={() => logOut()}
+                            >
                                 Logout
                             </Button>
                         </Grid>

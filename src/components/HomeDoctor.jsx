@@ -16,40 +16,78 @@ import {
     FormControlLabel,
     FormHelperText,
     Checkbox,
-    Avatar, 
+    Avatar,
+    CardActions,
+    Tabs,
+    Tab,
 } from "@mui/material";
 import CancelIcon from "@mui/icons-material/Cancel";
 import axiosClient from "../api-config";
 
 export default function HomeDoctor() {
     const [user, setUser] = useState(null);
-    const [specialties, setSpecialties] = useState([]);
-    const [checked, setChecked] = useState({});
+    const [consults, setConsults] = useState({ past: [], upcoming: [] });
+    const [patients, setPatients] = useState([]);
     const navigate = useNavigate();
 
-    const fetchSpecialties = async () => {
-        const response = await axiosClient.get("doctor/specialties");
+    const cancelConsult = async (id) => {
+        const body = { id, status: "Rejected" };
+        const header = { headers: { "Content-Type": "application/json" } };
+        const response = await axiosClient.post(
+            "doctor/consultation/update-status",
+            body,
+            header
+        );
+        if (response.status !== 200) {
+            console.log(response)
+            alert(response.response.data.message);
+            return;
+        } else {
+            alert("Consult cancelled successfully.");
+            window.location.reload();
+            return;
+        }
+    };
+
+    const fetchPatients = async () => {
+        const response = await axiosClient.get("patient/list");
         if (response.status !== 200) {
             alert(response.response.data.message);
             return;
         } else {
-            setSpecialties(
-                response.data.sort((a, b) => {
-                    if (a.name < b.name) {
-                        return -1;
-                    }
-                    if (a.name > b.name) {
-                        return 1;
-                    }
-                    return 0;
-                })
-            );
-            const newChecked = response.data.reduce((accu, curr) => {
-                accu[curr.id] = false;
-                return accu;
-            }, {});
-            setChecked(newChecked);
+            setPatients(response.data);
         }
+    };
+
+    const fetchConsults = async () => {
+        const response = await axiosClient.get(
+            `doctor/consultation?id=${user.id}`
+        );
+        if (response.status !== 200) {
+            alert(response.response.data.message);
+            return;
+        } else {
+            const upcoming = response.data.filter(
+                (el) => el.status === "Approved"
+            );
+            const past = response.data.filter(
+                (el) => el.status === "Completed"
+            );
+            setConsults({ past, upcoming });
+        }
+    };
+
+    useEffect(() => {
+        if (user) {
+            fetchConsults();
+        }
+        // eslint-disable-next-line
+    }, [user]);
+
+    const logOut = () => {
+        localStorage.removeItem("docSeekUser");
+        alert("Log out successful!");
+        navigate("/login");
     };
 
     useEffect(() => {
@@ -58,7 +96,7 @@ export default function HomeDoctor() {
             navigate("/login");
         } else {
             setUser(data.data);
-            fetchSpecialties();
+            fetchPatients();
         }
         // eslint-disable-next-line
     }, []);
@@ -82,7 +120,7 @@ export default function HomeDoctor() {
                     height: "100vh",
                     width: "100vw",
                     backgroundImage:
-                        "url(https://img.freepik.com/vetores-gratis/medicina-e-saude-na-cor-azul_1017-26807.jpg?w=2000)",
+                        "url(https://www.slidebackground.com/uploads/medical-background/medical-wallpapers-hd-free-download-25.jpg)",
                     backgroundRepeat: "no-repeat",
                     backgroundSize: "cover",
                     backgroundPosition: "center",
@@ -90,7 +128,7 @@ export default function HomeDoctor() {
                     zIndex: "-1",
                 }}
             />
-            {user && (
+            {user && patients.length > 0 && (
                 <Container
                     maxWidth="lg"
                     sx={{
@@ -100,14 +138,56 @@ export default function HomeDoctor() {
                     }}
                 >
                     <Grid container spacing={1}>
+                        <Grid
+                            item
+                            xs={12}
+                            sx={{
+                                borderBottom: 1,
+                                borderColor: "divider",
+                                mb: "2em",
+                            }}
+                        >
+                            <Tabs value={"Home"} centered>
+                                <Tab label={"Home"} value={"Home"} />
+                                <Tab
+                                    label={"Profile"}
+                                    value={"Profile"}
+                                    href={"/doctor/profile"}
+                                />
+                                <Tab
+                                    label={"Consultations"}
+                                    value={"Consultations"}
+                                    href={"/doctor/schedule"}
+                                />
+                            </Tabs>
+                        </Grid>
                         <Grid item container spacing={1} xs={12}>
-                            <Grid item xs={12} sx={{ display: "flex", justifyContent: "center" }}>
+                            <Grid
+                                item
+                                xs={12}
+                                sx={{
+                                    display: "flex",
+                                    justifyContent: "center",
+                                }}
+                            >
                                 <Avatar
                                     src="/images/med_logo.png"
-                                    sx={{ width: 150, height: 150, border: "0.25em solid rgb(34 86 138)" }}
+                                    sx={{
+                                        width: 150,
+                                        height: 150,
+                                        border: "0.25em solid rgb(34 86 138)",
+                                    }}
                                 />
                             </Grid>
-                            <Grid item xs={12} sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                            <Grid
+                                item
+                                xs={12}
+                                sx={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    alignItems: "center",
+                                }}
+                            >
                                 <Typography
                                     variant="h3"
                                     sx={{
@@ -117,8 +197,219 @@ export default function HomeDoctor() {
                                 >
                                     DocSeek
                                 </Typography>
-                                <Typography variant="overline" align="center" color="rgb(34 86 138)">Where we provide a one-stop solution to patients and doctors alike</Typography>
+                                <Typography
+                                    variant="overline"
+                                    align="center"
+                                    color="rgb(34 86 138)"
+                                >
+                                    Where we provide a one-stop solution to
+                                    patients and doctors alike
+                                </Typography>
+                                <Box
+                                    component="img"
+                                    maxWidth="sm"
+                                    src={
+                                        "https://www.counterpath.com/wp-content/uploads/2020/07/Healthcare-Banner.png"
+                                    }
+                                    sx={{ width: "100%", mt: "2em", mb: "2em" }}
+                                />
+                                <Grid item xs={12}>
+                                    <Typography
+                                        variant="h5"
+                                        align="center"
+                                        fontWeight="600"
+                                        mb="0.5em"
+                                    >
+                                        Upcoming Consults
+                                    </Typography>
+                                </Grid>
+
+                                {consults.upcoming.length === 0 && (
+                                    <Grid item xs={12}>
+                                        <Typography
+                                            vaariant="overline"
+                                            mb="2em"
+                                        >
+                                            No upcoming consults
+                                        </Typography>
+                                    </Grid>
+                                )}
+                                {consults.upcoming.length > 0 &&
+                                    consults.upcoming.map((consult) => {
+                                        const patient = patients.find(
+                                            (el) => el.id === consult.patient_id
+                                        );
+                                        return (
+                                            <Grid item xs={12} m="2em">
+                                                <Card
+                                                    sx={{
+                                                        p: "1em",
+                                                        width: "20em",
+                                                    }}
+                                                >
+                                                    <CardContent>
+                                                        <Typography variant="overline">
+                                                            Your patient:
+                                                        </Typography>
+                                                        <Typography
+                                                            variant="h6"
+                                                            gutterBottom
+                                                        >
+                                                            {patient.name}
+                                                        </Typography>
+                                                        <Typography variant="overline">
+                                                            Date of consult:
+                                                        </Typography>
+                                                        <Typography
+                                                            variant="h6"
+                                                            gutterBottom
+                                                        >
+                                                            {consult.date.slice(
+                                                                0,
+                                                                10
+                                                            )}
+                                                        </Typography>
+                                                        <Typography variant="overline">
+                                                            Time of consult:
+                                                        </Typography>
+                                                        <Typography
+                                                            variant="h6"
+                                                            gutterBottom
+                                                        >
+                                                            {consult.time}
+                                                        </Typography>
+                                                    </CardContent>
+                                                    <CardActions
+                                                        sx={{
+                                                            display: "flex",
+                                                            justifyContent:
+                                                                "flex-end",
+                                                        }}
+                                                    >
+                                                        <Button
+                                                            color="error"
+                                                            variant="outlined"
+                                                            onClick={() =>
+                                                                cancelConsult(
+                                                                    consult.id
+                                                                )
+                                                            }
+                                                        >
+                                                            Cancel consult
+                                                        </Button>
+                                                    </CardActions>
+                                                </Card>
+                                            </Grid>
+                                        );
+                                    })}
+
+                                <Grid item xs={12}>
+                                    <Typography
+                                        variant="h5"
+                                        align="center"
+                                        fontWeight="600"
+                                        mb="0.5em"
+                                    >
+                                        Past Consults
+                                    </Typography>
+                                </Grid>
+
+                                {consults.past.length === 0 && (
+                                    <Grid item xs={12}>
+                                        <Typography
+                                            vaariant="overline"
+                                            mb="2em"
+                                        >
+                                            No upcoming consults
+                                        </Typography>
+                                    </Grid>
+                                )}
+                                {consults.past.length > 0 &&
+                                    consults.past.map((consult) => {
+                                        const patient = patients.find(
+                                            (el) => el.id === consult.patient_id
+                                        );
+                                        return (
+                                            <Grid item xs={12} m="2em">
+                                                <Card
+                                                    sx={{
+                                                        p: "1em",
+                                                        width: "20em",
+                                                    }}
+                                                >
+                                                    <CardContent>
+                                                        <Typography variant="overline">
+                                                            Your patient:
+                                                        </Typography>
+                                                        <Typography
+                                                            variant="h6"
+                                                            gutterBottom
+                                                        >
+                                                            Dr. {patient.name}
+                                                        </Typography>
+                                                        <Typography variant="overline">
+                                                            Date of consult:
+                                                        </Typography>
+                                                        <Typography
+                                                            variant="h6"
+                                                            gutterBottom
+                                                        >
+                                                            {consult.date.slice(
+                                                                0,
+                                                                10
+                                                            )}
+                                                        </Typography>
+                                                        <Typography variant="overline">
+                                                            Time of consult:
+                                                        </Typography>
+                                                        <Typography
+                                                            variant="h6"
+                                                            gutterBottom
+                                                        >
+                                                            {consult.time}
+                                                        </Typography>
+                                                        <Typography variant="overline">
+                                                            Notes:
+                                                        </Typography>
+                                                        <Typography
+                                                            variant="h6"
+                                                            gutterBottom
+                                                        >
+                                                            {consult.notes}
+                                                        </Typography>
+                                                        <Typography variant="overline">
+                                                            Prescription:
+                                                        </Typography>
+                                                        <Typography
+                                                            variant="h6"
+                                                            gutterBottom
+                                                        >
+                                                            {
+                                                                consult.prescription
+                                                            }
+                                                        </Typography>
+                                                    </CardContent>
+                                                </Card>
+                                            </Grid>
+                                        );
+                                    })}
                             </Grid>
+                        </Grid>
+                        <Grid
+                            item
+                            xs={12}
+                            sx={{
+                                display: "flex",
+                                justifyContent: "center",
+                            }}
+                        >
+                            <Button
+                                variant="outlined"
+                                size="large"
+                                onClick={() => logOut()}
+                            >
+                                Logout
+                            </Button>
                         </Grid>
                     </Grid>
                 </Container>

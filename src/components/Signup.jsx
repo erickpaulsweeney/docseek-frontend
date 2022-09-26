@@ -58,7 +58,7 @@ export default function Signup() {
         } else {
             alert("Sign up successful!");
             localStorage.setItem("docSeekUser", JSON.stringify(response.data));
-            navigate("/profile");
+            navigate("/profile-patient");
         }
     };
 
