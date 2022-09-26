@@ -3,24 +3,13 @@ import { useNavigate, useParams } from "react-router-dom";
 import {
     Grid,
     Box,
-    TextField,
     Container,
     Typography,
     IconButton,
     Button,
-    FormControl,
-    FormLabel,
-    FormGroup,
-    FormControlLabel,
-    FormHelperText,
-    Checkbox,
-    Avatar,
     Card,
     CardContent,
-    CardActions,
-    Chip,
 } from "@mui/material";
-import CancelIcon from "@mui/icons-material/Cancel";
 import axiosClient from "../api-config";
 import "flatpickr/dist/themes/airbnb.css";
 import Flatpickr from "react-flatpickr";
@@ -53,7 +42,7 @@ export default function Consultation() {
             alert(response.response.data.message);
             return;
         } else {
-            const doctor = response.data.filter((el) => el.id == id)[0];
+            const doctor = response.data.filter((el) => Number(el.id) === Number(id))[0];
             setDoctor(doctor);
             const available = doctor.timeslots.slots.reduce(
                 (accu, curr, idx) => {
@@ -282,7 +271,7 @@ export default function Consultation() {
                                                             (item) =>
                                                                 Date(
                                                                     item.date
-                                                                ) ==
+                                                                ) ===
                                                                 Date(date[0])
                                                         );
                                                     if (sameDate) {
@@ -290,7 +279,7 @@ export default function Consultation() {
                                                             sameDate.time ===
                                                             timeslot
                                                         ) {
-                                                            return;
+                                                            return null;
                                                         }
                                                     }
                                                     return (

@@ -2,26 +2,14 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
     Grid,
-    Card,
-    CardContent,
     Box,
-    TextField,
     Container,
     Typography,
-    IconButton,
     Button,
-    FormControl,
-    FormLabel,
-    FormGroup,
-    FormControlLabel,
-    FormHelperText,
-    Checkbox,
     Avatar,
-    CardActions,
     Tabs,
     Tab,
 } from "@mui/material";
-import CancelIcon from "@mui/icons-material/Cancel";
 import axiosClient from "../api-config";
 
 export default function ProfileDoctor() {
@@ -37,12 +25,6 @@ export default function ProfileDoctor() {
         } else {
             setSpecialties(response.data);
         }
-    };
-
-    const logOut = () => {
-        localStorage.removeItem("docSeekUser");
-        alert("Log out successful!");
-        navigate("/login");
     };
 
     useEffect(() => {

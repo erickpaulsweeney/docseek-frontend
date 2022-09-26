@@ -6,15 +6,12 @@ import {
     TextField,
     Container,
     Typography,
-    IconButton,
     Button,
     FormControl,
     FormLabel,
     FormGroup,
     FormControlLabel,
-    FormHelperText,
     Checkbox,
-    Avatar,
     Card,
     CardContent,
     CardActions,
@@ -22,7 +19,6 @@ import {
     Tabs,
     Tab,
 } from "@mui/material";
-import CancelIcon from "@mui/icons-material/Cancel";
 import axiosClient from "../api-config";
 
 export default function Doctors() {
@@ -71,12 +67,6 @@ export default function Doctors() {
         } else {
             setDoctors(response.data);
         }
-    };
-
-    const logOut = () => {
-        localStorage.removeItem("docSeekUser");
-        alert("Log out successful!");
-        navigate("/login");
     };
 
     useEffect(() => {
@@ -276,7 +266,7 @@ export default function Doctors() {
                                         doctors.map((doctor) => {
                                             if (maxCost) {
                                                 if (doctor.rate > maxCost) {
-                                                    return;
+                                                    return null;
                                                 }
                                             }
                                             if (search.length > 0) {
@@ -285,7 +275,7 @@ export default function Doctors() {
                                                         search.toLowerCase()
                                                     )
                                                 ) {
-                                                    return;
+                                                    return null;
                                                 }
                                             }
                                             if (selected.length > 0) {
@@ -296,7 +286,7 @@ export default function Doctors() {
                                                         )
                                                     )
                                                 ) {
-                                                    return;
+                                                    return null;
                                                 }
                                             }
                                             return (

@@ -5,23 +5,14 @@ import {
     Card,
     CardContent,
     Box,
-    TextField,
     Container,
     Typography,
-    IconButton,
     Button,
-    FormControl,
-    FormLabel,
-    FormGroup,
-    FormControlLabel,
-    FormHelperText,
-    Checkbox,
     Avatar,
     CardActions,
     Tabs,
     Tab,
 } from "@mui/material";
-import CancelIcon from "@mui/icons-material/Cancel";
 import axiosClient from "../api-config";
 
 export default function HomeDoctor() {

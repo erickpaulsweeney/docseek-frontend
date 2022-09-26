@@ -2,27 +2,20 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
     Grid,
-    Card,
-    CardContent,
     Box,
     TextField,
     Container,
     Typography,
-    IconButton,
     Button,
     FormControl,
     FormLabel,
     FormGroup,
     FormControlLabel,
-    FormHelperText,
     Checkbox,
-    Avatar,
-    CardActions,
     Tabs,
     Tab,
     Chip,
 } from "@mui/material";
-import CancelIcon from "@mui/icons-material/Cancel";
 import axiosClient from "../api-config";
 
 export default function DoctorSchedule() {
@@ -31,7 +24,6 @@ export default function DoctorSchedule() {
     const [newRate, setNewRate] = useState("");
     const [checked, setChecked] = useState([]);
     const [editTimeslots, setEditTimeslots] = useState(false);
-    const [scheduled, setScheduled] = useState(false);
     const navigate = useNavigate();
 
     const days = [
@@ -137,9 +129,6 @@ export default function DoctorSchedule() {
                 }
             }
             setChecked(checked);
-            setScheduled(
-                Boolean(data.data.timeslots) || Boolean(data.data.rate)
-            );
         }
         // eslint-disable-next-line
     }, []);
@@ -299,7 +288,7 @@ export default function DoctorSchedule() {
                                     user.timeslots?.slots &&
                                     user.timeslots?.slots?.map((day, index) => {
                                         if (day.length === 0) {
-                                            return;
+                                            return null;
                                         }
 
                                         const dayName = days[index];

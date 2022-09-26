@@ -3,26 +3,15 @@ import { useNavigate } from "react-router-dom";
 import {
     Grid,
     Box,
-    TextField,
     Container,
     Typography,
-    IconButton,
     Button,
-    FormControl,
-    FormLabel,
-    FormGroup,
-    FormControlLabel,
-    FormHelperText,
-    Checkbox,
     Avatar,
     Card,
     CardContent,
-    CardActions,
-    Chip,
     Tabs,
     Tab,
 } from "@mui/material";
-import CancelIcon from "@mui/icons-material/Cancel";
 import axiosClient from "../api-config";
 
 export default function HomePatient() {

@@ -24,7 +24,7 @@ export default function ProfileDoctorEdit() {
     const [user, setUser] = useState(null);
     const [specialties, setSpecialties] = useState([]);
     const [checked, setChecked] = useState([]);
-    const [errorMsg, setErrorMsg] = useState("");
+    const [errorMsg, ] = useState("");
     const [qualiInputs, setQualiInputs] = useState([
         { training: "", institution: "" },
         { training: "", institution: "" },
@@ -168,6 +168,7 @@ export default function ProfileDoctorEdit() {
         if (user) {
             fetchSpecialties();
         }
+        // eslint-disable-next-line
     }, [user])
 
     useEffect(() => {

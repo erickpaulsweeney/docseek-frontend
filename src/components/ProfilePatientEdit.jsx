@@ -29,7 +29,7 @@ export default function ProfilePatientEdit() {
     const [issues, setIssues] = useState([{ issue: "", duration: "" }]);
     const [sex, setSex] = useState("female");
     const [bloodGroup, setBloodGroup] = useState("A");
-    const [errorMsg, setErrorMsg] = useState("");
+    const [errorMsg, ] = useState("");
     const navigate = useNavigate();
 
     const handleCheckChange = (id) => {
